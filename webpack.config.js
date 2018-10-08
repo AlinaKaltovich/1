@@ -1,13 +1,19 @@
 const LiveReloadPlugin = require('webpack-livereload-plugin');
 const webpack = require('webpack');
 const path = require('path');
+const src = path.join(__dirname, 'src');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports={
-    entry: './app.js',
+  entry: {
+      index: path.join(src, 'index.pug'),
+      bundle: path.join(src, 'main.js'),
+    },
     output: {
         filename: 'bundle.js',
     },
     devServer:{
-        index: 'index.html',
+      inline: true,
+      watchContentBase: true,
     },
     watch: true,
   module: {
@@ -23,12 +29,25 @@ module.exports={
           includePaths: []
         }
       }]
-    }]
+    }, {
+      test: /\.css$/,
+      use: ["style-loader", "css-loader", "postcss-loader"]
+    }, {
+      test: /\.(gif|svg|jpg|png)$/,
+      loader: "file-loader",
+    }, {
+      test: /\.(pug|jade)$/,
+      use:  ['html-loader', 'pug-html-loader?pretty&exports=false']
+    }] 
   },
   plugins: [
     new LiveReloadPlugin({}),
     new webpack.WatchIgnorePlugin([
       path.join(__dirname, "node_modules")
     ]),
-  ]
+    new webpack.HotModuleReplacementPlugin(),
+    new HtmlWebpackPlugin({
+    title: 'index.html',
+    template: path.join(src, 'index.pug'),
+    })]
 }
